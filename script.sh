@@ -6,14 +6,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-# 引数で指定されたYAMLファイルのパス
 FILE="$1"
 
-# 現在のディレクトリを取得
 CURRENT_DIR=$(pwd)
-
-# 現在のディレクトリと一致するディレクトリのコマンドを取得して表示
-# yq e ".cheatsheet[] | select(.dir == \"$CURRENT_DIR\") | .cmds[]" "$FILE"
 
 matching_dir=""
 while read -r dir; do
@@ -24,9 +19,12 @@ while read -r dir; do
   fi
 done < <(yq -r '.cheatsheet[].dir' "$FILE")
 
-if [[ -z "$matching_dir" ]]; then
-  yq e ".cheatsheet[] | select(.dir == null) | .cmds[]" "$FILE"
+# show cmds in all dir
+yq e ".cheatsheet[] | select(.dir == null) | .cmds[]" "$FILE"
+
+# show cmds in specific dir
+if [[ -n "$matching_dir" ]]; then
+  yq e ".cheatsheet[] | select(.dir == \"$matching_dir\") | .cmds[]" "$FILE"
   exit 
 fi
 
-yq e ".cheatsheet[] | select(.dir == \"$matching_dir\") | .cmds[]" "$FILE"
